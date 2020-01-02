@@ -1,8 +1,10 @@
+
+
 # APoT Quantization
 
 This repo contains the code and data of the following paper accepeted by [ICLR 2020](https://openreview.net/group?id=ICLR.cc/2020/Conference)
 
-> [Additive Power-of-Two Quantization: A Non-uniform Discretization For Neural Networks](https://openreview.net/pdf?id=BkgXT24tDS)
+> [Additive Power-of-Two Quantization: An Efficient Non-uniform Discretization For Neural Networks](https://openreview.net/pdf?id=BkgXT24tDS)
 
 **training codes** will be open sourced soon.
 

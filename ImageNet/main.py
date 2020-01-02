@@ -129,7 +129,7 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
     # create model
     print("=> creating model '{}'".format(args.arch))
-    model = models.__dict__[args.arch](pretrained=False)
+    model = models.__dict__[args.arch](pretrained=True)
     for m in model.modules():
         if isinstance(m, QuantConv2d):
             m.weight_quant = weight_quantize_fn(w_bit=args.bit)
