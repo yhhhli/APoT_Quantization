@@ -14,7 +14,8 @@ import torch.optim
 import torch.multiprocessing as mp
 import torch.utils.data
 import torch.utils.data.distributed
-import models.resnet
+import models
+from models.quant_layer import *
 from tensorboardX import SummaryWriter
 import sys
 import gc
@@ -36,6 +37,7 @@ parser.add_argument('-b', '--batch-size', default=1024, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
+parser.add_argument('--bit', default=5, type=int, help='the bit-width of the quantized network')
 parser.add_argument('--data', metavar='DATA_PATH', default='./data/',
                     help='path to imagenet data (default: ./data/)')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
@@ -127,7 +129,12 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
     # create model
     print("=> creating model '{}'".format(args.arch))
-    model = models.resnet.resnet18(pretrained=True)
+    model = models.__dict__[args.arch](pretrained=False)
+    for m in model.modules():
+        if isinstance(m, QuantConv2d):
+            m.weight_quant = weight_quantize_fn(w_bit=args.bit)
+            m.act_grid = build_power_value(args.bit)
+            m.act_alq = act_quantization(args.bit, m.act_grid)
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
