@@ -10,6 +10,16 @@ This repo contains the code and data of the following paper accepeted by [ICLR 2
   <img src="https://i.imgur.com/0oxm19W.png">
 </p>
 
+```
+@inproceedings{Li2020Additive,
+title={Additive Powers-of-Two Quantization: An Efficient Non-uniform Discretization for Neural Networks},
+author={Yuhang Li and Xin Dong and Wei Wang},
+booktitle={International Conference on Learning Representations},
+year={2020},
+url={https://openreview.net/forum?id=BkgXT24tDS}
+}
+```
+
 ## Installation
 
 ### Prerequisites
@@ -18,68 +28,12 @@ Pytorch 1.1.0 with CUDA
 
 ### Dataset Preparation
 
-* Please prepare the ImageNet validation dataset, we use [official example code](https://github.com/pytorch/examples/blob/master/imagenet/main.py) here to provide validation dataloader. 
-* The CIFAR10 validation dataset can be download automatically. 
-
-## CIFAR10
-
-change to the CIFAR10 directory first, and then  
-
-```bash
-python test.py --bit 5 
-```
-
-Then, you will get the output like this:
-
-```bash
-=> Building model...
-=> loading the 5-bit quantized model from checkpoint
-weight alpha: 2.828116, act alpha: 3.621083
-weight alpha: 2.414355, act alpha: 4.517607
-weight alpha: 2.685967, act alpha: 5.627809
-weight alpha: 2.298938, act alpha: 5.268279
-weight alpha: 2.696353, act alpha: 5.807320
-weight alpha: 2.834752, act alpha: 5.221708
-weight alpha: 2.683185, act alpha: 5.928465
-weight alpha: 2.768446, act alpha: 5.032526
-weight alpha: 2.308132, act alpha: 6.052375
-weight alpha: 2.562996, act alpha: 5.866919
-weight alpha: 2.166837, act alpha: 5.420985
-weight alpha: 2.441639, act alpha: 6.189524
-weight alpha: 2.481792, act alpha: 5.468916
-weight alpha: 2.854374, act alpha: 6.030290
-weight alpha: 2.444138, act alpha: 4.387599
-weight alpha: 2.275344, act alpha: 5.872911
-weight alpha: 2.159221, act alpha: 5.372866
-weight alpha: 2.109906, act alpha: 4.771915
-weight alpha: 2.147920, act alpha: 5.499549
-weight alpha: 2.642403, act alpha: 5.065750
-=> loading cifar10 data...
-Files already downloaded and verified
-Test: [0/100]	Time 0.366 (0.366)	Loss 0.2783 (0.2783)	Prec 93.000% (93.000%)
-Test: [10/100]	Time 0.017 (0.051)	Loss 0.3108 (0.3172)	Prec 91.000% (92.545%)
-Test: [20/100]	Time 0.016 (0.036)	Loss 0.5455 (0.3373)	Prec 87.000% (92.000%)
-Test: [30/100]	Time 0.016 (0.030)	Loss 0.3876 (0.3574)	Prec 91.000% (92.065%)
-Test: [40/100]	Time 0.015 (0.026)	Loss 0.5160 (0.3585)	Prec 89.000% (91.976%)
-Test: [50/100]	Time 0.015 (0.024)	Loss 0.2793 (0.3562)	Prec 93.000% (92.118%)
-Test: [60/100]	Time 0.015 (0.023)	Loss 0.3289 (0.3514)	Prec 93.000% (92.180%)
-Test: [70/100]	Time 0.015 (0.022)	Loss 0.6297 (0.3493)	Prec 91.000% (92.239%)
-Test: [80/100]	Time 0.017 (0.021)	Loss 0.2049 (0.3496)	Prec 94.000% (92.136%)
-Test: [90/100]	Time 0.016 (0.020)	Loss 0.3089 (0.3428)	Prec 94.000% (92.220%)
- * Prec 92.260%
-```
-
-We provide 5-bit, 3-bit and 2-bit quantized ResNet-20 here, `--bit 5` can be set to 3 and 2.
+* Please prepare the ImageNet validation and training dataset, we use [official example code](https://github.com/pytorch/examples/blob/master/imagenet/main.py) here to provide dataloader. 
+* The CIFAR10 dataset can be download automatically (update soon). 
 
 ## ImageNet
 
-We provide 5-bit quantized and 3-bit quantized ResNet-18 here, they can be downloaded in [this link](https://gofile.io/?c=GkchRp), then put them into the checkpoint folder in ImageNet. 
-
-To start validation, change to the ImageNet directory and then: 
-
-```bash
-python test.py --bit 3 
-```
+`models.quant_layer.py` contains the configuration for quantization. In particular, you can specify them in 
 
 Then, you can get the output like this:
 
