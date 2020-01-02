@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
 from models.resnet import *
-from models.quant_layer import QuantConv2d, build_power_value, power_quantization, uniform_quantization
+from models.quant_layer import *
 
 
 def heatmap(data, row_labels, col_labels, ax=None,
@@ -153,7 +153,7 @@ def find_apot_level(data):
 model = resnet18()
 checkpoint = torch.load('checkpoint/res18_5bit.pth.tar', map_location='cpu')          # load checkpoint into cpu
 state_dict = {k.replace('module.', ''): v for k, v in checkpoint.items()}
-model.load_state_dict(state_dict)
+model.load_state_dict(state_dict, strict=False)
 weights_q_matrix = None
 alpha = None
 for m in model.modules():                                                    # load weights in the first quantized layer
@@ -162,13 +162,14 @@ for m in model.modules():                                                    # l
         weights_q_matrix = weights_q_matrix.div(m.weight_quant.wgt_alpha.item())*1.5
         alpha = m.weight_quant.wgt_alpha.item()
         break
-weights_q_matrix = weights_q_matrix[0][0].reshape(3,3).detach().numpy() # select the first 81 elements in the first kernal
+print(weights_q_matrix.shape)
+weights_q_matrix = weights_q_matrix[0][0:6].reshape(3,18).detach().numpy() # select the first 81 elements in the first kernal
 
-fig, ax = plt.subplots(figsize=[3,3], dpi=100)
-im= heatmap(weights_q_matrix, 3, 3, ax=ax,
+fig, ax = plt.subplots(figsize=[18,3], dpi=150)
+im= heatmap(weights_q_matrix, 18, 3, ax=ax,
                    cmap="YlGn", cbarlabel="harvest [t/year]")
 texts = annotate_heatmap(im, valfmt="{x:.1f} t")
 
 fig.tight_layout()
-plt.savefig('weight_visual.png')
+plt.savefig('weight_visual.png', bbox_inches='tight')
 plt.show()

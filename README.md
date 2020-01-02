@@ -1,4 +1,4 @@
-
+![Figure generate by visualize.py](ImageNet/weight_visual.png?raw=True)
 
 # APoT Quantization
 
