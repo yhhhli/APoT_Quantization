@@ -67,7 +67,16 @@ We provide a function `show_params()` to print the clipping parameter in both we
 
 
 
+## CIFAR10
+
+The training code is inspired by [pytorch-cifar-code](https://github.com/junyuseu/pytorch-cifar-models) from [junyuseu](https://github.com/junyuseu).
+
+The dataset can be downloaded automatically using torchvision. To train the quantized model, full precision models need to be trained first. Then, run 
+
+```bash
+python main.py --bit 4 --init PATH-TO-FULL-PRECISION-MODEL
+```
+
 ## To Do:
 
-- CIFAR10 training code
 - checkpoints for all models
