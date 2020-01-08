@@ -22,12 +22,12 @@ parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='man
 parser.add_argument('-b', '--batch-size', default=128, type=int, metavar='N', help='mini-batch size (default: 128),only used for train')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float, metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M', help='momentum')
-parser.add_argument('--weight-decay', '--wd', default=5e-4, type=float, metavar='W', help='weight decay (default: 1e-4)')
+parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float, metavar='W', help='weight decay (default: 1e-4)')
 parser.add_argument('--print-freq', '-p', default=100, type=int, metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH', help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true', help='evaluate model on validation set')
 parser.add_argument('-ct', '--cifar-type', default='10', type=int, metavar='CT', help='10 for cifar10,100 for cifar100 (default: 10)')
-parser.add_argument('--init', action='store_true', help='initialize form pre-trained floating point model')
+parser.add_argument('--init', help='initialize form pre-trained floating point model', type=str, default='')
 parser.add_argument('-id', '--device', default='0', type=str, help='gpu device')
 parser.add_argument('--bit', default=4, type=int, help='the bit-width of the quantized network')
 
@@ -53,9 +53,9 @@ def main():
         model_params = []
         for name, params in model.module.named_parameters():
             if 'act_alpha' in name:
-                model_params += [{'params': [params], 'lr': 1e-2, 'weight_decay': 2e-5}]
+                model_params += [{'params': [params], 'lr': 1e-1, 'weight_decay': 1e-5}]
             elif 'wgt_alpha' in name:
-                model_params += [{'params': [params], 'lr': 1e-2, 'weight_decay': 2e-5}]
+                model_params += [{'params': [params], 'lr': 2e-2, 'weight_decay': 1e-4}]
             else:
                 model_params += [{'params': [params]}]
         optimizer = torch.optim.SGD(model_params, lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
@@ -74,7 +74,7 @@ def main():
         if os.path.isfile(args.init):
             print("=> loading pre-trained model")
             checkpoint = torch.load(args.init)
-            model.load_state_dict(checkpoint['state_dict'])
+            model.load_state_dict(checkpoint['state_dict'],strict=False)
         else:
             print('No pre-trained model found !')
             exit()
@@ -112,8 +112,10 @@ def main():
         adjust_learning_rate(optimizer, epoch)
 
         # train for one epoch
-        # if epoch%10 == 1:
-        #     model.module.show_params()
+        # model.module.record_weight(writer, epoch)
+        if epoch%10 == 1:
+            model.module.show_params()
+        # model.module.record_clip(writer, epoch)
         train(trainloader, model, criterion, optimizer, epoch)
 
         # evaluate on test set

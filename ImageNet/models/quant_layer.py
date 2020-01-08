@@ -103,7 +103,7 @@ class weight_quantize_fn(nn.Module):
         self.w_bit = w_bit-1
         self.power = power if w_bit>2 else False
         self.grids = build_power_value(self.w_bit, additive=True)
-        self.weight_q = weight_quantization(b=self.w_bit, grids=self.grids, power=power)
+        self.weight_q = weight_quantization(b=self.w_bit, grids=self.grids, power=self.power)
         self.register_parameter('wgt_alpha', Parameter(torch.tensor(3.0)))
 
     def forward(self, weight):
