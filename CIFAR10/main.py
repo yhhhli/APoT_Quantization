@@ -18,6 +18,7 @@ from models import *
 
 parser = argparse.ArgumentParser(description='PyTorch Cifar10 Training')
 parser.add_argument('--epochs', default=300, type=int, metavar='N', help='number of total epochs to run')
+parser.add_argument('-a', '--arch', metavar='ARCH', default='res20')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N', help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=128, type=int, metavar='N', help='mini-batch size (default: 128),only used for train')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float, metavar='LR', help='initial learning rate')
@@ -40,20 +41,29 @@ def main():
     use_gpu = torch.cuda.is_available()
     print(args.device)
     print('=> Building model...')
+    model=None
     if use_gpu:
-        model = resnet20_cifar()
-        for m in model.modules():
-            if isinstance(m, QuantConv2d):
-                m.weight_quant = weight_quantize_fn(w_bit=args.bit)
-                m.act_grid = build_power_value(args.bit)
-                m.act_alq = act_quantization(args.bit, m.act_grid)
+        float = True if args.bit == 32 else False
+        if args.arch == 'res20':
+            model = resnet20_cifar(float=float)
+        elif args.arch == 'res56':
+            model = resnet56_cifar(float=float)
+        else:
+            print('Architecture not support!')
+            return
+        if not float:
+            for m in model.modules():
+                if isinstance(m, QuantConv2d):
+                    m.weight_quant = weight_quantize_fn(w_bit=args.bit)
+                    m.act_grid = build_power_value(args.bit)
+                    m.act_alq = act_quantization(args.bit, m.act_grid)
 
         model = nn.DataParallel(model).cuda()
         criterion = nn.CrossEntropyLoss().cuda()
         model_params = []
         for name, params in model.module.named_parameters():
             if 'act_alpha' in name:
-                model_params += [{'params': [params], 'lr': 1e-1, 'weight_decay': 1e-5}]
+                model_params += [{'params': [params], 'lr': 1e-1, 'weight_decay': 1e-4}]
             elif 'wgt_alpha' in name:
                 model_params += [{'params': [params], 'lr': 2e-2, 'weight_decay': 1e-4}]
             else:
@@ -66,7 +76,7 @@ def main():
 
     if not os.path.exists('result'):
         os.makedirs('result')
-    fdir = 'result/res20_' + str(args.bit) + 'bit'
+    fdir = 'result/'+str(args.arch)+'_'+str(args.bit)+'bit'
     if not os.path.exists(fdir):
         os.makedirs(fdir)
 
@@ -106,7 +116,7 @@ def main():
     if args.evaluate:
         validate(testloader, model, criterion)
         return
-    writer = SummaryWriter(comment='res20_' + str(args.bit) + 'bit')
+    writer = SummaryWriter(comment=fdir.replace('result/', ''))
 
     for epoch in range(args.start_epoch, args.epochs):
         adjust_learning_rate(optimizer, epoch)
@@ -240,6 +250,7 @@ def save_checkpoint(state, is_best, fdir):
     torch.save(state, filepath)
     if is_best:
         shutil.copyfile(filepath, os.path.join(fdir, 'model_best.pth.tar'))
+
 
 def adjust_learning_rate(optimizer, epoch):
     """For resnet, the lr starts from 0.1, and is divided by 10 at 80 and 120 epochs"""
