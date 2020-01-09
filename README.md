@@ -53,13 +53,13 @@ Here, `self.bit`  controls the bitwidth;  `weight_quantize_fn` controls the quan
 
 To train a 5-bit model, just run main.py:
 
-```bas
+```bash
 python main.py -a resnet18 --bit 5
 ```
 
 Progressive initialization requires checkpoint of higher bitwidth. For example
 
-```ba
+```bash
 python main.py -a resnet18 --bit 4 --pretrained checkpoint/res18_5best.pth.tar
 ```
 
@@ -96,6 +96,39 @@ The checkpoint models for CIFAR10 are released:
 | Res56 | 4-bit          | **93.93** | [Res56_4bit](https://github.com/yhhhli/APoT_Quantization/tree/master/CIFAR10/result/res56_4bit) |
 | Res56 | 3-bit          | TBD       | TBD                                                          |
 | Res56 | 2-bit          | TBD       | TBD                                                          |
+
+To evluate the models, you can run 
+
+```bash
+python main.py -e --init result/res20_3bit/model_best.pth.tar -e -id 0 --bit 3
+```
+
+And you will get the output of accuracy and the value of clipping threshold in weights & acts:
+
+```bash
+Test: [0/100]   Time 0.221 (0.221)      Loss 0.2144 (0.2144)    Prec 96.000% (96.000%)
+ * Prec 92.510%
+clipping threshold weight alpha: 1.569000, activation alpha: 1.438000
+clipping threshold weight alpha: 1.278000, activation alpha: 0.966000
+clipping threshold weight alpha: 1.607000, activation alpha: 1.293000
+clipping threshold weight alpha: 1.426000, activation alpha: 1.055000
+clipping threshold weight alpha: 1.364000, activation alpha: 1.720000
+clipping threshold weight alpha: 1.511000, activation alpha: 1.434000
+clipping threshold weight alpha: 1.600000, activation alpha: 2.204000
+clipping threshold weight alpha: 1.552000, activation alpha: 1.530000
+clipping threshold weight alpha: 0.934000, activation alpha: 1.939000
+clipping threshold weight alpha: 1.427000, activation alpha: 2.232000
+clipping threshold weight alpha: 1.463000, activation alpha: 1.371000
+clipping threshold weight alpha: 1.440000, activation alpha: 2.432000
+clipping threshold weight alpha: 1.560000, activation alpha: 1.475000
+clipping threshold weight alpha: 1.605000, activation alpha: 2.462000
+clipping threshold weight alpha: 1.436000, activation alpha: 1.619000
+clipping threshold weight alpha: 1.292000, activation alpha: 2.147000
+clipping threshold weight alpha: 1.423000, activation alpha: 2.329000
+clipping threshold weight alpha: 1.428000, activation alpha: 1.551000
+clipping threshold weight alpha: 1.322000, activation alpha: 2.574000
+clipping threshold weight alpha: 1.687000, activation alpha: 1.314000
+```
 
 
 
