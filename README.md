@@ -12,7 +12,7 @@ This repo contains the code and data of the following paper accepeted by [ICLR 2
   <img src="https://i.imgur.com/0oxm19W.png">
 </p>
 
-```
+```latex
 @inproceedings{Li2020Additive,
 title={Additive Powers-of-Two Quantization: An Efficient Non-uniform Discretization for Neural Networks},
 author={Yuhang Li and Xin Dong and Wei Wang},
@@ -71,12 +71,34 @@ We provide a function `show_params()` to print the clipping parameter in both we
 
 The training code is inspired by [pytorch-cifar-code](https://github.com/junyuseu/pytorch-cifar-models) from [junyuseu](https://github.com/junyuseu).
 
-The dataset can be downloaded automatically using torchvision. To train the quantized model, full precision models need to be trained first. Then, run 
+The dataset can be downloaded automatically using torchvision. We provide the shell script to progressively train full precision, 4, 3, and 2 bit models. For example, `train_res20.sh` :
 
-```bash
-python main.py --bit 4 --init PATH-TO-FULL-PRECISION-MODEL
+``` bash
+#!/usr/bin/env bash
+python main.py --arch res20 --bit 32 -id 0,1 --wd 5e-4
+python main.py --arch res20 --bit 4 -id 0,1 --wd 1e-4  --lr 4e-2 \
+        --init result/res20_32bit/model_best.pth.tar
+python main.py --arch res20 --bit 3 -id 0,1 --wd 1e-4  --lr 4e-2 \
+        --init result/res20_4bit/model_best.pth.tar
+python main.py --arch res20 --bit 2 -id 0,1 --wd 3e-5  --lr 4e-2 \
+        --init result/res20_3bit/model_best.pth.tar
 ```
+
+The checkpoint models for CIFAR10 are released: 
+
+| Model | Precision      | Accuracy  | Checkpoints                                                  |
+| :---: | -------------- | --------- | ------------------------------------------------------------ |
+| Res20 | Full Precision | 92.96     | [Res20_32bit](https://github.com/yhhhli/APoT_Quantization/tree/master/CIFAR10/result/res20_32bit) |
+| Res20 | 4-bit          | **92.45** | [Res20_4bit](https://github.com/yhhhli/APoT_Quantization/tree/master/CIFAR10/result/res20_4bit) |
+| Res20 | 3-bit          | **92.49** | [Res20_3bit](https://github.com/yhhhli/APoT_Quantization/tree/master/CIFAR10/result/res20_3bit) |
+| Res20 | 2-bit          | **90.96** | [Res20_2bit](https://github.com/yhhhli/APoT_Quantization/tree/master/CIFAR10/result/res20_2bit) |
+| Res56 | Full Precision | 94.46     | [Res56_32bit](https://github.com/yhhhli/APoT_Quantization/tree/master/CIFAR10/result/res56_32bit) |
+| Res56 | 4-bit          | **93.93** | [Res56_4bit](https://github.com/yhhhli/APoT_Quantization/tree/master/CIFAR10/result/res56_4bit) |
+| Res56 | 3-bit          | TBD       | TBD                                                          |
+| Res56 | 2-bit          | TBD       | TBD                                                          |
+
+
 
 ## To Do:
 
-- checkpoints for all models
+- checkpoints for ImageNet models
