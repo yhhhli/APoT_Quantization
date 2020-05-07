@@ -186,7 +186,7 @@ def main_worker(gpu, ngpus_per_node, args):
             model_params += [{'params': [params], 'lr': 1e-2, 'weight_decay': 1e-4}]
         else:
             model_params += [{'params': [params]}]
-    optimizer = torch.optim.SGD(model_params, lr=args.lr, momentum=0.9, weight_decay=args.wd)
+    optimizer = torch.optim.SGD(model_params, lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
     print('Total params: %.2fM' % (sum(p.numel() for p in model.parameters()) / 1e+6))
 
     # optionally resume from a checkpoint
