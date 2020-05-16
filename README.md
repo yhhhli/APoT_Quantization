@@ -1,4 +1,4 @@
-![weight_visual](/Users/liyuhang/Documents/GitHub/APoT_Quantization/figs/weight_visual.png)
+![weight_visual](figs/weight_visual.png)
 
 # APoT Quantization
 
@@ -15,7 +15,7 @@ This repo contains the code and data of the following paper accepeted by [ICLR 2
 
 > [Additive Power-of-Two Quantization: An Efficient Non-uniform Discretization For Neural Networks](https://openreview.net/pdf?id=BkgXT24tDS)
 
-![quantize_function](/Users/liyuhang/Documents/GitHub/APoT_Quantization/figs/quantize_function.png)
+![quantize_function](figs/quantize_function.png)
 
 ## Change Log
 
