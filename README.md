@@ -99,7 +99,7 @@ Checkpoints are released in [Google Drive](https://drive.google.com/open?id=1iIZ
 |   Model   | Precision | Hyper-Params                      | Accuracy | Checkpoints                                                  |
 | :-------: | --------- | --------------------------------- | -------- | ------------------------------------------------------------ |
 | ResNet-18 | 5-bit     | batch1k_lr0.01_wd0.0001_100epoch  | -        | Updating                                                     |
-| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.74    | Updating                                                     |
+| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.74    | [res18_4bit](https://drive.google.com/open?id=1rpHbbjmA539xndpg-2QIludSvWDNrMGP) |
 | ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 69.79    | [res18_3bit](https://drive.google.com/open?id=1zJX3tbAbBXYxpP8QYx3dvMQoiGrCO9dc) |
 | ResNet-18 | 2-bit     | batch1k_lr0.01_wd0.00002_100epoch | -        | Updating                                                     |
 | ResNet-34 | 5-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.26    | [res34_5bit](https://drive.google.com/open?id=1tXIV03PNu8QpSF2fhrR3werhBB34Sb42) |

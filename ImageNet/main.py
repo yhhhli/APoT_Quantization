@@ -170,7 +170,7 @@ def main_worker(gpu, ngpus_per_node, args):
         if os.path.isfile(args.pretrained):
             print("=> loading pre-trained model from {}".format(args.pretrained))
             checkpoint = torch.load(args.pretrained)
-            model.load_state_dict(checkpoint['state_dict'])
+            model.load_state_dict(checkpoint['model'])
             model.module.show_params()
         else:
             print('no pre-trained model found')
@@ -187,7 +187,7 @@ def main_worker(gpu, ngpus_per_node, args):
         else:
             model_params += [{'params': [params]}]
     optimizer = torch.optim.SGD(model_params, lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100, eta_min=0.0)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30,60,90], gamma=0.1)
     print('Total params: %.2fM' % (sum(p.numel() for p in model.parameters()) / 1e+6))
 
     # optionally resume from a checkpoint
