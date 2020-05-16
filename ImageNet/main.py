@@ -178,16 +178,17 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # define loss function (criterion) and optimizer
     criterion = nn.CrossEntropyLoss().cuda(args.gpu)
-    model_params = []
-    for name, params in model.module.named_parameters():
-        if 'act_alpha' in name:
-            model_params += [{'params': [params], 'lr': 3e-2, 'weight_decay': 2e-5}]
-        elif 'wgt_alpha' in name:
-            model_params += [{'params': [params], 'lr': 1e-2, 'weight_decay': 1e-4}]
-        else:
-            model_params += [{'params': [params]}]
-    optimizer = torch.optim.SGD(model_params, lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
-    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30,60,90], gamma=0.1)
+    # customize the lr and wd for clipping thresholds
+    # model_params = []
+    # for name, params in model.module.named_parameters():
+    #     if 'act_alpha' in name:
+    #         model_params += [{'params': [params], 'lr': 3e-2, 'weight_decay': 2e-5}]
+    #     elif 'wgt_alpha' in name:
+    #         model_params += [{'params': [params], 'lr': 1e-2, 'weight_decay': 1e-4}]
+    #     else:
+    #         model_params += [{'params': [params]}]
+    optimizer = torch.optim.SGD(model.parameters(), lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
+    scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[30, 60, 90], gamma=0.1)
     print('Total params: %.2fM' % (sum(p.numel() for p in model.parameters()) / 1e+6))
 
     # optionally resume from a checkpoint
