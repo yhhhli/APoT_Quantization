@@ -45,7 +45,7 @@ parser.add_argument('-b', '--batch-size', default=1024, type=int,
 parser.add_argument('--bit', default=5, type=int, help='the bit-width of the quantized network')
 parser.add_argument('--data', metavar='DATA_PATH', default='./data/',
                     help='path to imagenet data (default: ./data/)')
-parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
+parser.add_argument('--lr', '--learning-rate', default=0.01, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
