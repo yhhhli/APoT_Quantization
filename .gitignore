@@ -33,6 +33,7 @@
 .Trashes
 .xml
 .iml
+.pyc
 ehthumbs.db
 Thumbs.db
 

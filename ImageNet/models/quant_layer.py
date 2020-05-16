@@ -1,7 +1,11 @@
+# Additive Power-of-Two Quantization: An Efficient Non-uniform Discretization For Neural Networks
+# Yuhang Li, Xin Dong, Wei Wang
+# International Conference on Learning Representations (ICLR), 2020.
+
+
 import torch.nn as nn
 import torch
 import torch.nn.functional as F
-from torch.nn.parameter import Parameter
 
 
 # this function construct an additive pot quantization levels set, with clipping threshold = 1,
@@ -39,7 +43,7 @@ def build_power_value(B=2, additive=True):
                     base_a.append(2 ** (-2 * i - 2))
                     base_b.append(2 ** (-2 * i - 3))
         else:
-            pass
+            raise NotImplementedError
     else:
         for i in range(2 ** B - 1):
             base_a.append(2 ** (-i - 1))
@@ -53,125 +57,108 @@ def build_power_value(B=2, additive=True):
     return values
 
 
-def weight_quantization(b, grids, power=True):
-
-    def uniform_quant(x, b):
-        xdiv = x.mul((2 ** b - 1))
-        xhard = xdiv.round().div(2 ** b - 1)
-        return xhard
+def apot_quantization(tensor, alpha, proj_set, is_weight=True):
 
     def power_quant(x, value_s):
-        shape = x.shape
-        xhard = x.view(-1)
-        value_s = value_s.type_as(x)
-        idxs = (xhard.unsqueeze(0) - value_s.unsqueeze(1)).abs().min(dim=0)[1]  # project to nearest quantization level
-        xhard = value_s[idxs].view(shape)
-        # xout = (xhard - x).detach() + x
-        return xhard
-
-    class _pq(torch.autograd.Function):
-        @staticmethod
-        def forward(ctx, input, alpha):
-            input.div_(alpha)                          # weights are first divided by alpha
-            input_c = input.clamp(min=-1, max=1)       # then clipped to [-1,1]
-            sign = input_c.sign()
-            input_abs = input_c.abs()
-            if power:
-                input_q = power_quant(input_abs, grids).mul(sign)  # project to Q^a(alpha, B)
-            else:
-                input_q = uniform_quant(input_abs, b).mul(sign)
-            ctx.save_for_backward(input, input_q)
-            input_q = input_q.mul(alpha)               # rescale to the original range
-            return input_q
-
-        @staticmethod
-        def backward(ctx, grad_output):
-            grad_input = grad_output.clone()             # grad for weights will not be clipped
-            input, input_q = ctx.saved_tensors
-            i = (input.abs()>1.).float()
-            sign = input.sign()
-            grad_alpha = (grad_output*(sign*i + (input_q-input)*(1-i))).sum()
-            return grad_input, grad_alpha
-
-    return _pq().apply
-
-
-class weight_quantize_fn(nn.Module):
-    def __init__(self, w_bit, power=True):
-        super(weight_quantize_fn, self).__init__()
-        assert (w_bit <=5 and w_bit > 0) or w_bit == 32
-        self.w_bit = w_bit-1
-        self.power = power if w_bit>2 else False
-        self.grids = build_power_value(self.w_bit, additive=True)
-        self.weight_q = weight_quantization(b=self.w_bit, grids=self.grids, power=self.power)
-        self.register_parameter('wgt_alpha', Parameter(torch.tensor(3.0)))
-
-    def forward(self, weight):
-        if self.w_bit == 32:
-            weight_q = weight
+        if is_weight:
+            shape = x.shape
+            xhard = x.view(-1)
+            sign = x.sign()
+            value_s = value_s.type_as(x)
+            xhard = xhard.abs()
+            idxs = (xhard.unsqueeze(0) - value_s.unsqueeze(1)).abs().min(dim=0)[1]
+            xhard = value_s[idxs].view(shape).mul(sign)
+            xhard = xhard
         else:
-            mean = weight.data.mean()
-            std = weight.data.std()
-            weight = weight.add(-mean).div(std)      # weights normalization
-            weight_q = self.weight_q(weight, self.wgt_alpha)
-        return weight_q
+            shape = x.shape
+            xhard = x.view(-1)
+            value_s = value_s.type_as(x)
+            xhard = xhard
+            idxs = (xhard.unsqueeze(0) - value_s.unsqueeze(1)).abs().min(dim=0)[1]
+            xhard = value_s[idxs].view(shape)
+            xhard = xhard
+        xout = (xhard - x).detach() + x
+        return xout
+
+    data = tensor / alpha
+    if is_weight:
+        data = data.clamp(-1, 1)
+        data_q = power_quant(data, proj_set)
+        data_q = data_q * alpha
+    else:
+        data = data.clamp(0, 1)
+        data_q = power_quant(data, proj_set)
+        data_q = data_q * alpha
+    return data_q
 
 
-def act_quantization(b, grid, power=True):
-
-    def uniform_quant(x, b=3):
-        xdiv = x.mul(2 ** b - 1)
-        xhard = xdiv.round().div(2 ** b - 1)
-        return xhard
-
-    def power_quant(x, grid):
-        shape = x.shape
-        xhard = x.view(-1)
-        value_s = grid.type_as(x)
-        idxs = (xhard.unsqueeze(0) - value_s.unsqueeze(1)).abs().min(dim=0)[1]
-        xhard = value_s[idxs].view(shape)
-        return xhard
-
-    class _uq(torch.autograd.Function):
-        @staticmethod
-        def forward(ctx, input, alpha):
-            input=input.div(alpha)
-            input_c = input.clamp(max=1)
-            if power:
-                input_q = power_quant(input_c, grid)
-            else:
-                input_q = uniform_quant(input_c, b)
-            ctx.save_for_backward(input, input_q)
-            input_q = input_q.mul(alpha)
-            return input_q
-
-        @staticmethod
-        def backward(ctx, grad_output):
-            grad_input = grad_output.clone()
-            input, input_q = ctx.saved_tensors
-            i = (input > 1.).float()
-            grad_alpha = (grad_output * (i + (input_q - input) * (1 - i))).sum()
-            grad_input = grad_input*(1-i)
-            return grad_input, grad_alpha
-
-    return _uq().apply
+def uniform_quantization(tensor, alpha, bit, is_weight=True):
+    data = tensor / alpha
+    if is_weight:
+        data = data.clamp(-1, 1)
+        data = data * (2 ** (bit - 1) - 1)
+        data_q = (data.round() - data).detach() + data
+        data_q = data_q / (2 ** (bit - 1) - 1) * alpha
+    else:
+        data = data.clamp(0, 1)
+        data = data * (2 ** bit - 1)
+        data_q = (data.round() - data).detach() + data
+        data_q = data_q / (2 ** (bit - 1) - 1) * alpha
+    return data_q
 
 
 class QuantConv2d(nn.Conv2d):
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False):
+    """Generates quantized convolutional layers.
+
+    args:
+        bit(int): bitwidth for the quantization,
+        power(bool): (A)PoT or Uniform quantization
+        additive(float): Use additive or vanilla PoT quantization
+
+    procedure:
+        1. determine if the bitwidth is illegal
+        2. if using PoT quantization, then build projection set. (For 2-bit weights quantization, PoT = Uniform)
+        3. generate the clipping thresholds
+
+    forward:
+        1. if bit = 32(full precision), call normal convolution
+        2. if not, first normalize the weights and then quantize the weights and activations
+    """
+
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1,
+                 bias=False, bit=5, power=True, additive=True):
         super(QuantConv2d, self).__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups,
                                           bias)
         self.layer_type = 'QuantConv2d'
-        self.bit = 4
-        self.weight_quant = weight_quantize_fn(w_bit=self.bit, power=True)
-        self.act_grid = build_power_value(self.bit, additive=True)
-        self.act_alq = act_quantization(self.bit, self.act_grid, power=True)
-        self.act_alpha = torch.nn.Parameter(torch.tensor(8.0))
+        assert bit == 32 or (bit >= 2 and bit <= 8), 'Bitwidth Not Supported!'
+        self.bit = bit
+        if self.bit != 32:
+            self.power = power
+            if power:
+                if self.bit > 2:
+                    self.proj_set_weight = build_power_value(B=self.bit-1, additive=additive)
+                self.proj_set_act = build_power_value(B=self.bit, additive=additive)
+            self.act_alpha = torch.nn.Parameter(torch.tensor(6.0))
+            self.weight_alpha = torch.nn.Parameter(torch.tensor(3.0))
 
     def forward(self, x):
-        weight_q = self.weight_quant(self.weight)
-        x = self.act_alq(x, self.act_alpha)
-        return F.conv2d(x, weight_q, self.bias, self.stride,
+        if self.bit == 32:
+            return F.conv2d(x, self.weight, self.bias, self.stride,
+                            self.padding, self.dilation, self.groups)
+        # weight normalization
+        mean = self.weight.mean()
+        std = self.weight.std()
+        weight = self.weight.add(-mean).div(std)
+        if self.power:
+            if self.bit > 2:
+                weight = apot_quantization(weight, self.weight_alpha, self.proj_set_weight, is_weight=True)
+            else:
+                weight = uniform_quantization(weight, self.weight_alpha, self.bit, is_weight=True)
+            x = apot_quantization(x, self.act_alpha, self.proj_set_act, is_weight=False)
+        else:
+            weight = uniform_quantization(weight, self.weight_alpha, self.bit, is_weight=True)
+            x = uniform_quantization(x, self.act_alpha, self.bit, is_weight=False)
+        return F.conv2d(x, weight, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
 
     def show_params(self):
@@ -183,7 +170,8 @@ class QuantConv2d(nn.Conv2d):
 # 8-bit quantization for the first and the last layer
 class first_conv(nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False):
-        super(first_conv, self).__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias)
+        super(first_conv, self).__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups,
+                                         bias)
         self.layer_type = 'FConv2d'
 
     def forward(self, x):
@@ -192,6 +180,7 @@ class first_conv(nn.Conv2d):
         weight_q = (weight_q-self.weight).detach()+self.weight
         return F.conv2d(x, weight_q, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
+
 
 class last_fc(nn.Linear):
     def __init__(self, in_features, out_features, bias=True):
