@@ -1,3 +1,8 @@
+# Additive Power-of-Two Quantization: An Efficient Non-uniform Discretization For Neural Networks
+# Yuhang Li, Xin Dong, Wei Wang
+# International Conference on Learning Representations (ICLR), 2020.
+
+
 import argparse
 import os
 import random
@@ -129,12 +134,7 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
     # create model
     print("=> creating model '{}'".format(args.arch))
-    model = models.__dict__[args.arch](pretrained=True)
-    for m in model.modules():
-        if isinstance(m, QuantConv2d):
-            m.weight_quant = weight_quantize_fn(w_bit=args.bit)
-            m.act_grid = build_power_value(args.bit)
-            m.act_alq = act_quantization(args.bit, m.act_grid)
+    model = models.__dict__[args.arch](pretrained=True, bit=args.bit)
 
     if args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
@@ -186,7 +186,8 @@ def main_worker(gpu, ngpus_per_node, args):
             model_params += [{'params': [params], 'lr': 1e-2, 'weight_decay': 1e-4}]
         else:
             model_params += [{'params': [params]}]
-    optimizer = torch.optim.SGD(model_params, lr=args.lr, momentum=0.9, weight_decay=args.wd)
+    optimizer = torch.optim.SGD(model_params, lr=args.lr, momentum=0.9, weight_decay=args.weight_decay)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100, eta_min=0.0)
     print('Total params: %.2fM' % (sum(p.numel() for p in model.parameters()) / 1e+6))
 
     # optionally resume from a checkpoint
@@ -252,13 +253,14 @@ def main_worker(gpu, ngpus_per_node, args):
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
             train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch, args)
+        # adjust_learning_rate(optimizer, epoch, args)
 
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args, writer)
 
         # evaluate on validation set
         acc1 = validate(val_loader, model, criterion, args)
+        scheduler.step()
         writer.add_scalar('test_acc', acc1, epoch)
         # remember best acc@1 and save checkpoint
         is_best = acc1 > best_acc1
