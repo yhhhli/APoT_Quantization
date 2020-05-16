@@ -86,30 +86,30 @@ python main.py -a resnet18 --bit 4 --pretrained checkpoint/res18_5best.pth.tar
 
 We provide a function `show_params()` to print the clipping parameter in both weights and activations
 
-#### Hyper-params
+###Hyper-params
 
 Models are initialized with pre-trained models, please use `pretrained=True` to intialize the model. We use the following hyper-params for all parameters, including the clipping thresholds.
 
 Learning rate is scaled by 0.1 at epoch 30,60,90.
 
-#### Results and Checkpoints
+### Results and Checkpoints
 
 Checkpoints are released in [Google Drive](https://drive.google.com/open?id=1iIZ1tsaFLSuaujPbnyLutxDZuG31i5kD).
 
 |   Model   | Precision | Hyper-Params                      | Accuracy | Checkpoints                                                  |
 | :-------: | --------- | --------------------------------- | -------- | ------------------------------------------------------------ |
 | ResNet-18 | 5-bit     | batch1k_lr0.01_wd0.0001_100epoch  | -        | Updating                                                     |
-| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.69    | Updating                                                     |
+| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.74    | Updating                                                     |
 | ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 69.79    | [res18_3bit](https://drive.google.com/open?id=1zJX3tbAbBXYxpP8QYx3dvMQoiGrCO9dc) |
 | ResNet-18 | 2-bit     | batch1k_lr0.01_wd0.00002_100epoch | -        | Updating                                                     |
 | ResNet-34 | 5-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.26    | [res34_5bit](https://drive.google.com/open?id=1tXIV03PNu8QpSF2fhrR3werhBB34Sb42) |
 | ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch   | -        | Updating                                                     |
 
-####Compared with Uniform Quantization
+### Compared with Uniform Quantization
 
 To be updated
 
-#### Training and Validation Curve
+### Training and Validation Curve
 
 To be updated
 
