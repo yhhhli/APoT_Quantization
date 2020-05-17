@@ -87,7 +87,9 @@ python main.py -a resnet18 --bit 4 --pretrained checkpoint/res18_5best.pth.tar
 
 We provide a function `show_params()` to print the clipping parameter in both weights and activations
 
-###Hyper-params and Calibrated Gradients for 2-bit Weights Quantization
+
+
+### Hyper-params and Calibrated Gradients for 2-bit Weights Quantization
 
 Models are initialized with pre-trained models, please use `pretrained=True` to intialize the model. We use the following hyper-params for all parameters, including the clipping thresholds.
 
