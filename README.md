@@ -107,7 +107,13 @@ Checkpoints are released in [Google Drive](https://drive.google.com/open?id=1iIZ
 
 ### Compared with Uniform Quantization
 
-To be updated
+Use `power=False` to switch to the uniform quantization, results:
+
+|   Model   | Precision | Hyper-Params                      | Accuracy | Compared with APoT |
+| :-------: | --------- | --------------------------------- | -------- | ------------------ |
+| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | -        | Updating           |
+| ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch  | -        | Updating           |
+| ResNet-18 | 2-bit     | batch1k_lr0.01_wd0.00002_100epoch | -        | Updating           |
 
 ### Training and Validation Curve
 
@@ -120,7 +126,9 @@ tensorboard --logdir 'res18' --port 6006
 
 ![logs](figs/tensorboard.png)
 
-###Hyper-parameteres Exploration
+
+
+### Hyper-Parameter Exploration
 
 To be updated
 
