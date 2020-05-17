@@ -38,5 +38,6 @@
 ehthumbs.db
 Thumbs.db
 
-
-.xml
+# Ignore ImageNet Pre-trained Models #
+######################################
+*ImageNet/checkpoint/*
