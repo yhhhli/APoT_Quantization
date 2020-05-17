@@ -32,9 +32,9 @@
 *.idea*
 .Spotlight-V100
 .Trashes
-.xml
-.iml
-.pyc
+*.xml
+*.iml
+*.pyc
 ehthumbs.db
 Thumbs.db
 
