@@ -20,6 +20,7 @@ This repo contains the code and data of the following paper accepeted by [ICLR 2
 ## Change Log
 
 + May 16 2020: New quantization function, checkpoints for ImageNet, and slides for brief introduction.
++ May 17 2020: Add implementation for calibrated gradients in 2-bit weight quantization and grad scale.
 
 ## Installation
 
@@ -86,11 +87,13 @@ python main.py -a resnet18 --bit 4 --pretrained checkpoint/res18_5best.pth.tar
 
 We provide a function `show_params()` to print the clipping parameter in both weights and activations
 
-###Hyper-params
+###Hyper-params and Calibrated Gradients for 2-bit Weights Quantization
 
 Models are initialized with pre-trained models, please use `pretrained=True` to intialize the model. We use the following hyper-params for all parameters, including the clipping thresholds.
 
 Learning rate is scaled by 0.1 at epoch 30,60,90.
+
+![calibrated gradients](figs/cali_grad.png)
 
 ### Results and Checkpoints
 
@@ -103,7 +106,8 @@ Checkpoints are released in [Google Drive](https://drive.google.com/open?id=1iIZ
 | ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 69.79    | [res18_3bit](https://drive.google.com/open?id=1zJX3tbAbBXYxpP8QYx3dvMQoiGrCO9dc) |
 | ResNet-18 | 2-bit     | batch1k_lr0.01_wd0.00002_100epoch | -        | Updating                                                     |
 | ResNet-34 | 5-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.26    | [res34_5bit](https://drive.google.com/open?id=1tXIV03PNu8QpSF2fhrR3werhBB34Sb42) |
-| ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch   | -        | Updating                                                     |
+| ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.08    | Updating                                                     |
+| ResNet-34 | 3-bit     | batch1k_lr0.1_wd0.0001_100epoch   | -        | Updating                                                     |
 
 ### Compared with Uniform Quantization
 

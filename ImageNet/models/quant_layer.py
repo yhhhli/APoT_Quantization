@@ -43,7 +43,7 @@ def build_power_value(B=2, additive=True):
                     base_a.append(2 ** (-2 * i - 2))
                     base_b.append(2 ** (-2 * i - 3))
         else:
-            raise NotImplementedError
+            pass
     else:
         for i in range(2 ** B - 1):
             base_a.append(2 ** (-i - 1))
@@ -57,8 +57,14 @@ def build_power_value(B=2, additive=True):
     return values
 
 
-def apot_quantization(tensor, alpha, proj_set, is_weight=True):
+def gradient_scale(x, scale):
+    yout = x
+    ygrad = x * scale
+    y = (yout - ygrad).detach() + ygrad
+    return y
 
+
+def apot_quantization(tensor, alpha, proj_set, is_weight=True, grad_scale=None):
     def power_quant(x, value_s):
         if is_weight:
             shape = x.shape
@@ -80,6 +86,8 @@ def apot_quantization(tensor, alpha, proj_set, is_weight=True):
         xout = (xhard - x).detach() + x
         return xout
 
+    if grad_scale:
+        alpha = gradient_scale(alpha, grad_scale)
     data = tensor / alpha
     if is_weight:
         data = data.clamp(-1, 1)
@@ -92,7 +100,34 @@ def apot_quantization(tensor, alpha, proj_set, is_weight=True):
     return data_q
 
 
-def uniform_quantization(tensor, alpha, bit, is_weight=True):
+def uq_with_calibrated_graditens(grad_scale=None):
+    class _uq(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, input, alpha):
+            input.div_(alpha)
+            input_c = input.clamp(min=-1, max=1)
+            input_q = input_c.round()
+            ctx.save_for_backward(input, input_q)
+            input_q = input_q.mul(alpha)  # rescale to the original range
+            return input_q
+
+        @staticmethod
+        def backward(ctx, grad_output):
+            grad_input = grad_output.clone()  # calibration: grad for weights will not be clipped
+            input, input_q = ctx.saved_tensors
+            i = (input.abs() > 1.).float()
+            sign = input.sign()
+            grad_alpha = (grad_output * (sign * i + (input_q - input) * (1 - i))).sum()
+            if grad_scale:
+                grad_alpha = grad_alpha * grad_scale
+            return grad_input, grad_alpha
+
+    return _uq().apply
+
+
+def uniform_quantization(tensor, alpha, bit, is_weight=True, grad_scale=None):
+    if grad_scale:
+        alpha = gradient_scale(alpha, grad_scale)
     data = tensor / alpha
     if is_weight:
         data = data.clamp(-1, 1)
@@ -123,23 +158,23 @@ class QuantConv2d(nn.Conv2d):
     forward:
         1. if bit = 32(full precision), call normal convolution
         2. if not, first normalize the weights and then quantize the weights and activations
+        3. if bit = 2, apply calibrated gradients uniform quantization to weights.
     """
 
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1,
-                 bias=False, bit=5, power=True, additive=True):
+                 bias=False, bit=5, power=True, additive=True, grad_scale=None):
         super(QuantConv2d, self).__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups,
                                           bias)
         self.layer_type = 'QuantConv2d'
-        assert bit == 32 or (bit >= 2 and bit <= 8), 'Bitwidth Not Supported!'
         self.bit = bit
-        if self.bit != 32:
-            self.power = power
-            if power:
-                if self.bit > 2:
-                    self.proj_set_weight = build_power_value(B=self.bit-1, additive=additive)
-                self.proj_set_act = build_power_value(B=self.bit, additive=additive)
-            self.act_alpha = torch.nn.Parameter(torch.tensor(6.0))
-            self.weight_alpha = torch.nn.Parameter(torch.tensor(3.0))
+        self.power = power
+        self.grad_scale = grad_scale
+        if power:
+            if self.bit > 2:
+                self.proj_set_weight = build_power_value(B=self.bit - 1, additive=additive)
+            self.proj_set_act = build_power_value(B=self.bit, additive=additive)
+        self.act_alpha = torch.nn.Parameter(torch.tensor(6.0))
+        self.weight_alpha = torch.nn.Parameter(torch.tensor(3.0))
 
     def forward(self, x):
         if self.bit == 32:
@@ -151,13 +186,16 @@ class QuantConv2d(nn.Conv2d):
         weight = self.weight.add(-mean).div(std)
         if self.power:
             if self.bit > 2:
-                weight = apot_quantization(weight, self.weight_alpha, self.proj_set_weight, is_weight=True)
+                weight = apot_quantization(weight, self.weight_alpha, self.proj_set_weight, True, self.grad_scale)
             else:
-                weight = uniform_quantization(weight, self.weight_alpha, self.bit, is_weight=True)
-            x = apot_quantization(x, self.act_alpha, self.proj_set_act, is_weight=False)
+                weight = uq_with_calibrated_graditens(self.grad_scale)(weight, self.weight_alpha)
+            x = apot_quantization(x, self.act_alpha, self.proj_set_act, False, self.grad_scale)
         else:
-            weight = uniform_quantization(weight, self.weight_alpha, self.bit, is_weight=True)
-            x = uniform_quantization(x, self.act_alpha, self.bit, is_weight=False)
+            if self.bit > 2:
+                weight = uniform_quantization(weight, self.weight_alpha, self.bit, True, self.grad_scale)
+            else:
+                weight = uq_with_calibrated_graditens(self.grad_scale)(weight, self.weight_alpha)
+            x = uniform_quantization(x, self.act_alpha, self.bit, False, self.grad_scale)
         return F.conv2d(x, weight, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
 
@@ -177,7 +215,7 @@ class first_conv(nn.Conv2d):
     def forward(self, x):
         max = self.weight.data.max()
         weight_q = self.weight.div(max).mul(127).round().div(127).mul(max)
-        weight_q = (weight_q-self.weight).detach()+self.weight
+        weight_q = (weight_q - self.weight).detach() + self.weight
         return F.conv2d(x, weight_q, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
 
@@ -190,5 +228,5 @@ class last_fc(nn.Linear):
     def forward(self, x):
         max = self.weight.data.max()
         weight_q = self.weight.div(max).mul(127).round().div(127).mul(max)
-        weight_q = (weight_q-self.weight).detach()+self.weight
+        weight_q = (weight_q - self.weight).detach() + self.weight
         return F.linear(x, weight_q, self.bias)
