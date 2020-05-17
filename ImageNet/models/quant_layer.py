@@ -158,7 +158,7 @@ class QuantConv2d(nn.Conv2d):
     forward:
         1. if bit = 32(full precision), call normal convolution
         2. if not, first normalize the weights and then quantize the weights and activations
-        3. if bit = 2, apply calibrated gradients uniform quantization to weights.
+        3. if bit = 2, apply calibrated gradients uniform quantization to weights
     """
 
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1,

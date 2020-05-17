@@ -54,21 +54,21 @@ class QuantConv2d(nn.Conv2d):
     forward:
         1. if bit = 32(full precision), call normal convolution
         2. if not, first normalize the weights and then quantize the weights and activations
+        3. if bit = 2, apply calibrated gradients uniform quantization to weights
     """
 
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False, bit=5, power=True, additive=True):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, dilation=1, groups=1, bias=False, bit=5, power=True, additive=True, grad_scale=None):
         super(QuantConv2d, self).__init__(in_channels, out_channels, kernel_size, stride, padding, dilation, groups, bias)
         self.layer_type = 'QuantConv2d'
-        assert bit == 32 or (bit >= 2 and bit <= 8), 'Bitwidth Not Supported!'
         self.bit = bit
-        if self.bit != 32:
-            self.power = power
-            if power:
-                if self.bit > 2:
-                    self.proj_set_weight = build_power_value(B=self.bit-1, additive=additive)
-                self.proj_set_act = build_power_value(B=self.bit, additive=additive)
-            self.act_alpha = torch.nn.Parameter(torch.tensor(6.0))
-            self.weight_alpha = torch.nn.Parameter(torch.tensor(3.0))
+        self.power = power
+        self.grad_scale = grad_scale
+        if power:
+            if self.bit > 2:
+                self.proj_set_weight = build_power_value(B=self.bit-1, additive=additive)
+            self.proj_set_act = build_power_value(B=self.bit, additive=additive)
+        self.act_alpha = torch.nn.Parameter(torch.tensor(6.0))
+        self.weight_alpha = torch.nn.Parameter(torch.tensor(3.0))
 ```
 
 Here, `self.bit`  controls the bitwidth;  `power=True` means we use PoT or APoT (use `additive` to specify). `build_power_value` construct the levels set Q^a(1, b) with parameter `bit` and `additive`. If `power=False`, the conv layer will adopt uniform quantization. 
