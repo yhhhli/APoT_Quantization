@@ -106,24 +106,22 @@ Checkpoints are released in [Google Drive](https://drive.google.com/open?id=1iIZ
 | ResNet-18 | 5-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.75    | [res18_5bit](https://drive.google.com/open?id=1AuXWyBwt8yi1ocrsp4laVUwXI7W52S6G) |
 | ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.74    | [res18_4bit](https://drive.google.com/open?id=1rpHbbjmA539xndpg-2QIludSvWDNrMGP) |
 | ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 69.79    | [res18_3bit](https://drive.google.com/open?id=1zJX3tbAbBXYxpP8QYx3dvMQoiGrCO9dc) |
-| ResNet-18 | 2-bit     | batch1k_lr0.01_wd0.00002_100epoch | -        | Updating                                                     |
+| ResNet-18 | 2-bit     | batch1k_lr0.01_wd0.00002_110epoch | -        | Updating                                                     |
 | ResNet-34 | 5-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.26    | [res34_5bit](https://drive.google.com/open?id=1tXIV03PNu8QpSF2fhrR3werhBB34Sb42) |
-| ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.08    | Updating                                                     |
-| ResNet-34 | 3-bit     | batch1k_lr0.1_wd0.0001_100epoch   | -        | Updating                                                     |
-
+| ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.12    | [res34_4bit](https://drive.google.com/open?id=1RpKa0vL0kkSfsM8Oicb48Xx5Ei9OLjD2) |
+| ResNet-34 | 3-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 73.55    | [res34_3bit](https://drive.google.com/open?id=1edi_N460uXzpCUYD36hPgvR5kziUayna) |
+| ResNet-34 | 2-bit     | batch1k_lr0.1_wd0.0002_100epoch   | -        | Updating                                                     |
 ### Compared with Uniform Quantization
 
 Use `power=False` to switch to the uniform quantization, results:
 
 |   Model   | Precision | Hyper-Params                      | Accuracy | Compared with APoT |
 | :-------: | --------- | --------------------------------- | -------- | ------------------ |
-| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | -        | Updating           |
-| ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch  | -        | Updating           |
+| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.54    | -0.2               |
+| ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 69.57    | -0.22              |
 | ResNet-18 | 2-bit     | batch1k_lr0.01_wd0.00002_100epoch | -        | Updating           |
 
 ### Training and Validation Curve
-
-To be updated
 
 ```bash
 cd $PATH-TO-THIS-PROJECT/ImageNet/events
