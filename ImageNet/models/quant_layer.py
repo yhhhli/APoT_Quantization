@@ -200,9 +200,10 @@ class QuantConv2d(nn.Conv2d):
                         self.padding, self.dilation, self.groups)
 
     def show_params(self):
-        wgt_alpha = round(self.weight_quant.wgt_alpha.data.item(), 3)
-        act_alpha = round(self.act_alpha.data.item(), 3)
-        print('clipping threshold weight alpha: {:2f}, activation alpha: {:2f}'.format(wgt_alpha, act_alpha))
+        if self.bit != 32:
+            wgt_alpha = round(self.weight_alpha.data.item(), 3)
+            act_alpha = round(self.act_alpha.data.item(), 3)
+            print('clipping threshold weight alpha: {:2f}, activation alpha: {:2f}'.format(wgt_alpha, act_alpha))
 
 
 # 8-bit quantization for the first and the last layer
