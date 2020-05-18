@@ -101,16 +101,18 @@ Learning rate is scaled by 0.1 at epoch 30,60,90.
 
 Checkpoints are released in [Google Drive](https://drive.google.com/open?id=1iIZ1tsaFLSuaujPbnyLutxDZuG31i5kD).
 
-|   Model   | Precision | Hyper-Params                      | Accuracy | Checkpoints                                                  |
-| :-------: | --------- | --------------------------------- | -------- | ------------------------------------------------------------ |
-| ResNet-18 | 5-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.75    | [res18_5bit](https://drive.google.com/open?id=1AuXWyBwt8yi1ocrsp4laVUwXI7W52S6G) |
-| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 70.74    | [res18_4bit](https://drive.google.com/open?id=1rpHbbjmA539xndpg-2QIludSvWDNrMGP) |
-| ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch  | 69.79    | [res18_3bit](https://drive.google.com/open?id=1zJX3tbAbBXYxpP8QYx3dvMQoiGrCO9dc) |
-| ResNet-18 | 2-bit     | batch1k_lr0.01_wd0.00002_110epoch | -        | Updating                                                     |
-| ResNet-34 | 5-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.26    | [res34_5bit](https://drive.google.com/open?id=1tXIV03PNu8QpSF2fhrR3werhBB34Sb42) |
-| ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 74.12    | [res34_4bit](https://drive.google.com/open?id=1RpKa0vL0kkSfsM8Oicb48Xx5Ei9OLjD2) |
-| ResNet-34 | 3-bit     | batch1k_lr0.1_wd0.0001_100epoch   | 73.55    | [res34_3bit](https://drive.google.com/open?id=1edi_N460uXzpCUYD36hPgvR5kziUayna) |
-| ResNet-34 | 2-bit     | batch1k_lr0.1_wd0.0002_100epoch   | -        | Updating                                                     |
+|   Model   | Precision | Hyper-Params                         | Accuracy | Checkpoints                                                  |
+| :-------: | --------- | ------------------------------------ | -------- | ------------------------------------------------------------ |
+| ResNet-18 | 5-bit     | batch1k_lr0.01_wd0.0001_100epoch     | 70.75    | [res18_5bit](https://drive.google.com/open?id=1AuXWyBwt8yi1ocrsp4laVUwXI7W52S6G) |
+| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch     | 70.74    | [res18_4bit](https://drive.google.com/open?id=1rpHbbjmA539xndpg-2QIludSvWDNrMGP) |
+| ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch     | 69.79    | [res18_3bit](https://drive.google.com/open?id=1zJX3tbAbBXYxpP8QYx3dvMQoiGrCO9dc) |
+| ResNet-18 | 2-bit     | batch1k_lr0.04_wd0.00002_100epoch_cg | 66.46    | [res18_2bit](https://drive.google.com/open?id=18j8HqFKSUAns6hYKd_hydSeIuN0eolWB) |
+| ResNet-34 | 5-bit     | batch1k_lr0.1_wd0.0001_100epoch      | 74.26    | [res34_5bit](https://drive.google.com/open?id=1tXIV03PNu8QpSF2fhrR3werhBB34Sb42) |
+| ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch      | 74.12    | [res34_4bit](https://drive.google.com/open?id=1RpKa0vL0kkSfsM8Oicb48Xx5Ei9OLjD2) |
+| ResNet-34 | 3-bit     | batch1k_lr0.1_wd0.0001_100epoch      | 73.55    | [res34_3bit](https://drive.google.com/open?id=1edi_N460uXzpCUYD36hPgvR5kziUayna) |
+| ResNet-34 | 2-bit     | batch1k_lr0.1_wd0.00002_100epoch_cg  | 71.30    | [res34_2bit](https://drive.google.com/open?id=1WqIOxwjT_h_lvD34yvi2Yib4y2nW79KA) |
+| ResNet-50 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch      | -        | Updating                                                     |
+
 ### Compared with Uniform Quantization
 
 Use `power=False` to switch to the uniform quantization, results:
@@ -129,8 +131,6 @@ tensorboard --logdir 'res18' --port 6006
 ```
 
 ![logs](figs/tensorboard.png)
-
-
 
 ### Hyper-Parameter Exploration
 
