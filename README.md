@@ -6,8 +6,8 @@
 @article{li2019additive,
   title={Additive Powers-of-Two Quantization: A Non-uniform Discretization for Neural Networks},
   author={Li, Yuhang and Dong, Xin and Wang, Wei},
-  journal={arXiv preprint arXiv:1909.13144},
-  year={2019}
+  journal={International Conference on Learning Representations},
+  year={2020}
 }
 ```
 
