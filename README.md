@@ -17,10 +17,12 @@ This repo contains the code and data of the following paper accepeted by [ICLR 2
 
 ![quantize_function](figs/quantize_function.png)
 
-## Change Log
+## Updates
 
 + May 16 2020: New quantization function, checkpoints for ImageNet, and slides for brief introduction.
 + May 17 2020: Add implementation for calibrated gradients in 2-bit weight quantization and grad scale.
++ Dec 18 2020: Add MobilenetV2 implmentation.
++ Feb 2021: Our new paper BRECQ has been accepted at ICLR 2021, a new state-of-the-art in post-training quantization and can quantize ResNet-18 in 20 mins! ([Paper](https://openreview.net/forum?id=POWv6hDd9XH), [Code](https://github.com/yhhhli/BRECQ))
 
 ## Installation
 
@@ -87,31 +89,23 @@ python main.py -a resnet18 --bit 4 --pretrained checkpoint/res18_5best.pth.tar
 
 We provide a function `show_params()` to print the clipping parameter in both weights and activations
 
-
-
-### Hyper-params and Calibrated Gradients for 2-bit Weights Quantization
-
-Models are initialized with pre-trained models, please use `pretrained=True` to intialize the model. We use the following hyper-params for all parameters, including the clipping thresholds.
-
-Learning rate is scaled by 0.1 at epoch 30,60,90.
-
-![calibrated gradients](figs/cali_grad.png)
-
 ### Results and Checkpoints
 
 Checkpoints are released in [Google Drive](https://drive.google.com/open?id=1iIZ1tsaFLSuaujPbnyLutxDZuG31i5kD).
 
-|   Model   | Precision | Hyper-Params                         | Accuracy | Checkpoints                                                  |
-| :-------: | --------- | ------------------------------------ | -------- | ------------------------------------------------------------ |
-| ResNet-18 | 5-bit     | batch1k_lr0.01_wd0.0001_100epoch     | 70.75    | [res18_5bit](https://drive.google.com/open?id=1AuXWyBwt8yi1ocrsp4laVUwXI7W52S6G) |
-| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch     | 70.74    | [res18_4bit](https://drive.google.com/open?id=1rpHbbjmA539xndpg-2QIludSvWDNrMGP) |
-| ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch     | 69.79    | [res18_3bit](https://drive.google.com/open?id=1zJX3tbAbBXYxpP8QYx3dvMQoiGrCO9dc) |
-| ResNet-18 | 2-bit     | batch1k_lr0.04_wd0.00002_100epoch_cg | 66.46    | [res18_2bit](https://drive.google.com/open?id=18j8HqFKSUAns6hYKd_hydSeIuN0eolWB) |
-| ResNet-34 | 5-bit     | batch1k_lr0.1_wd0.0001_100epoch      | 74.26    | [res34_5bit](https://drive.google.com/open?id=1tXIV03PNu8QpSF2fhrR3werhBB34Sb42) |
-| ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch      | 74.12    | [res34_4bit](https://drive.google.com/open?id=1RpKa0vL0kkSfsM8Oicb48Xx5Ei9OLjD2) |
-| ResNet-34 | 3-bit     | batch1k_lr0.1_wd0.0001_100epoch      | 73.55    | [res34_3bit](https://drive.google.com/open?id=1edi_N460uXzpCUYD36hPgvR5kziUayna) |
-| ResNet-34 | 2-bit     | batch1k_lr0.1_wd0.00002_100epoch_cg  | 71.30    | [res34_2bit](https://drive.google.com/open?id=1WqIOxwjT_h_lvD34yvi2Yib4y2nW79KA) |
-| ResNet-50 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch      | -        | Updating                                                     |
+|   Model   | Precision | Hyper-Params                          | Accuracy | Checkpoints                                                  |
+| :-------: | --------- | ------------------------------------- | -------- | ------------------------------------------------------------ |
+| ResNet-18 | 5-bit     | batch1k_lr0.01_wd0.0001_100epoch      | 70.75    | [res18_5bit](https://drive.google.com/open?id=1AuXWyBwt8yi1ocrsp4laVUwXI7W52S6G) |
+| ResNet-18 | 4-bit     | batch1k_lr0.01_wd0.0001_100epoch      | 70.74    | [res18_4bit](https://drive.google.com/open?id=1rpHbbjmA539xndpg-2QIludSvWDNrMGP) |
+| ResNet-18 | 3-bit     | batch1k_lr0.01_wd0.0001_100epoch      | 69.79    | [res18_3bit](https://drive.google.com/open?id=1zJX3tbAbBXYxpP8QYx3dvMQoiGrCO9dc) |
+| ResNet-18 | 2-bit     | batch1k_lr0.04_wd0.00002_100epoch_cg  | 66.46    | [res18_2bit](https://drive.google.com/open?id=18j8HqFKSUAns6hYKd_hydSeIuN0eolWB) |
+| ResNet-34 | 5-bit     | batch1k_lr0.1_wd0.0001_100epoch       | 74.26    | [res34_5bit](https://drive.google.com/open?id=1tXIV03PNu8QpSF2fhrR3werhBB34Sb42) |
+| ResNet-34 | 4-bit     | batch1k_lr0.1_wd0.0001_100epoch       | 74.12    | [res34_4bit](https://drive.google.com/open?id=1RpKa0vL0kkSfsM8Oicb48Xx5Ei9OLjD2) |
+| ResNet-34 | 3-bit     | batch1k_lr0.1_wd0.0001_100epoch       | 73.55    | [res34_3bit](https://drive.google.com/open?id=1edi_N460uXzpCUYD36hPgvR5kziUayna) |
+| ResNet-34 | 2-bit     | batch1k_lr0.1_wd0.00002_100epoch_cg   | 71.30    | [res34_2bit](https://drive.google.com/open?id=1WqIOxwjT_h_lvD34yvi2Yib4y2nW79KA) |
+| ResNet-50 | 4-bit     | batch512_lr0.05_wd0.0001_100epoch     | 76.80    | Updating                                                     |
+| ResNet-50 | 3-bit     | batch512_lr0.05_wd0.0001_100epoch     | 75.92    | Updating                                                     |
+| ResNet-50 | 2-bit     | batch512_lr0.05_wd0.00025_100epoch_cg | -        | Updating                                                     |
 
 ### Compared with Uniform Quantization
 
