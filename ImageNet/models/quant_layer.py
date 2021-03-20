@@ -138,7 +138,7 @@ def uniform_quantization(tensor, alpha, bit, is_weight=True, grad_scale=None):
         data = data.clamp(0, 1)
         data = data * (2 ** bit - 1)
         data_q = (data.round() - data).detach() + data
-        data_q = data_q / (2 ** (bit - 1) - 1) * alpha
+        data_q = data_q / (2 ** bit - 1) * alpha
     return data_q
 
 
