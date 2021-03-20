@@ -3,11 +3,13 @@
 # APoT Quantization
 
 ```latex
-@article{li2019additive,
-  title={Additive Powers-of-Two Quantization: A Non-uniform Discretization for Neural Networks},
-  author={Li, Yuhang and Dong, Xin and Wang, Wei},
-  journal={International Conference on Learning Representations},
-  year={2020}
+@inproceedings{
+Li2020Additive,
+title={Additive Powers-of-Two Quantization: An Efficient Non-uniform Discretization for Neural Networks},
+author={Yuhang Li and Xin Dong and Wei Wang},
+booktitle={International Conference on Learning Representations},
+year={2020},
+url={https://openreview.net/forum?id=BkgXT24tDS}
 }
 ```
 
