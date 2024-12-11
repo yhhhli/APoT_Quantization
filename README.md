@@ -13,7 +13,7 @@ url={https://openreview.net/forum?id=BkgXT24tDS}
 }
 ```
 
-This repo contains the code and data of the following paper accepeted by [ICLR 2020](https://openreview.net/group?id=ICLR.cc/2020/Conference)
+This repo contains the code and data of the paper accepeted by [ICLR 2020](https://openreview.net/group?id=ICLR.cc/2020/Conference)
 
 > [Additive Power-of-Two Quantization: An Efficient Non-uniform Discretization For Neural Networks](https://openreview.net/pdf?id=BkgXT24tDS)
 
